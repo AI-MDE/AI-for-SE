@@ -45,6 +45,12 @@ This documentation follows a problem-first structure. Start with the problem sta
 
 ---
 
+## 7. Worked Example
+
+- [Worked Example](worked-example/README.md) — step-by-step application of the method on a small existing codebase scenario
+
+---
+
 ## Suggested Reading Order
 
 1. Problem Statement
@@ -56,6 +62,7 @@ This documentation follows a problem-first structure. Start with the problem sta
 7. Required Capabilities
 8. Required Components
 9. Use Cases
+10. Worked Example
 
 ---
 
