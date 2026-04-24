@@ -27,6 +27,7 @@ This documentation set is organized like a small wiki, following a problem-first
 
 - [Gaps & Challenges](gaps-and-challenges.md)
 - [Implications](implications.md)
+- [Required Components](required-components.md)
 - [Problem Statement](problem-statement.md)
 
 ---
@@ -73,9 +74,10 @@ This documentation set is organized like a small wiki, following a problem-first
 4. AI Usage Patterns (Scenarios)
 5. Gaps & Challenges
 6. Implications
-7. Problem Statement
-8. Use Cases
-9. Diagrams
-10. AI-MDE-Light Overview
-11. Architecture + Patterns
-12. Skills and Tools
+7. Required Components
+8. Problem Statement
+9. Use Cases
+10. Diagrams
+11. AI-MDE-Light Overview
+12. Architecture + Patterns
+13. Skills and Tools
