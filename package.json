@@ -8,6 +8,8 @@
     "analyze": "tsx tools/analyze-codebase.ts",
     "filter-code-map": "tsx tools/filter-code-map.ts",
     "validate-task": "tsx tools/validate-task.ts",
+    "init-ai-mde": "tsx tools/init-ai-mde.ts",
+    "run-change": "tsx tools/run-change-request.ts",
     "test": "echo \"No tests yet\""
   },
   "devDependencies": {
