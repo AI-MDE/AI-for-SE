@@ -61,7 +61,7 @@ This documentation follows a problem-first structure. Start with the problem sta
 
 ## Non-Goals
 
-This repository does not address:
+This repository does not focus on:
 
 - AI model training or fine-tuning
 - Prompt engineering techniques
