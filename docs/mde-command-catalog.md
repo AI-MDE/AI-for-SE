@@ -2,7 +2,19 @@
 
 [← Usage Options](usage-options.md) | [Home](Home.md) | [Next: Use Cases](use-cases.md)
 
-This page defines the first command set for using AI-MDE from inside an AI-enabled IDE such as Claude Code, Codex, Cursor, or another agentic development environment.
+This page defines the command set for using AI-MDE from inside an AI-enabled IDE such as Claude Code, Codex, Cursor, or another agentic development environment.
+
+These commands are intended to be **wired and executable**, not future placeholders.
+
+Each command may combine:
+
+- deterministic local scripts
+- MCP tool calls
+- AI reasoning steps
+- local artifact writes
+- short AI-visible summaries
+
+---
 
 ## Naming Convention
 
@@ -37,17 +49,44 @@ This keeps token usage low and avoids sending large generated artifacts back to 
 
 ---
 
+## MCP Execution Model
+
+The AI IDE command is the user-facing command.
+
+Behind it, the AI client may call MCP tools that wrap local scripts.
+
+Example:
+
+```text
+mde_generate_codemap
+  → MCP tool: mde.generate_codemap
+  → local script: mde analyze
+  → output: .ai/code-map.full.json
+  → AI-visible summary only
+```
+
+The core rule:
+
+```text
+Scripts do deterministic work.
+AI does interpretation, normalization, planning, and code editing.
+MCP connects the AI IDE to the local MDE toolchain.
+```
+
+---
+
 ## Command List
 
-| Command | Purpose | AI Needed? | Main Output |
-|---|---|---:|---|
-| `mde_capture_requirements_from_codebase` | Infer draft requirements from existing code | Yes | M1 Requirements draft |
-| `mde_capture_architecture_from_codebase` | Infer architecture and patterns from existing code | Yes | M3 Architecture & Patterns draft |
-| `mde_generate_codemap` | Generate structural code-map | No | M6 Codebase Model |
-| `mde_generate_work_items_from_git_issues` | Convert GitHub issues into work-items | Maybe | Work-item list |
-| `mde_define_work_item` | Start a new work-item / plan | Maybe | Work-item draft |
-| `mde_review_work_item_scope` | Review scope and develop plan | Yes | Approved-ready plan |
-| `mde_approve_work_item` | Approve work-item for execution | Human approval required | Approved plan marker |
+| Command | Purpose | Script Step | AI Step | Main Output |
+|---|---|---|---|---|
+| `mde_capture_requirements_from_codebase` | Infer draft requirements from existing code | collect routes, handlers, tests, docs | infer requirements and gaps | M1 Requirements draft |
+| `mde_capture_architecture_from_codebase` | Infer architecture and patterns from existing code | collect structure, dependencies, examples | normalize architecture and patterns | M3 Architecture & Patterns draft |
+| `mde_generate_codemap` | Generate structural code-map | static analysis | none, except summary interpretation | M6 Codebase Model |
+| `mde_generate_work_items_from_git_issues` | Convert GitHub issues into work-items | fetch issues | normalize vague issues into work-items | Work-item list |
+| `mde_define_work_item` | Start a new work-item / plan | create work-item artifact | normalize scope if needed | Work-item draft |
+| `mde_review_work_item_scope` | Review scope and develop plan | load models, filter code-map | plan affected changes | Approved-ready plan |
+| `mde_approve_work_item` | Approve work-item for execution | record approval metadata | none, approval is human | Approved plan marker |
+| `mde_execute_approved_work_item` | Execute approved work-item | load approved plan, run validation | apply changes through AI IDE | changed files + report |
 
 ---
 
@@ -71,17 +110,37 @@ Optional scoped invocation:
 mde_capture_requirements_from_codebase module=leave-management
 ```
 
-### Behavior
+### MCP / Script Steps
 
-The command inspects:
+```text
+mde.scan_routes
+mde.scan_handlers
+mde.scan_domain_entities
+mde.scan_tests
+mde.collect_existing_docs
+```
 
-- routes/controllers
-- command/query handlers
-- domain entities
-- tests
-- README/API docs if available
+These steps write extracted evidence to local files:
 
-It produces inferred requirements, not final truth.
+```text
+.ai/evidence/routes.json
+.ai/evidence/handlers.json
+.ai/evidence/domain-entities.json
+.ai/evidence/tests.json
+.ai/evidence/docs-index.json
+```
+
+### AI Steps
+
+The AI reads the evidence summaries and produces inferred requirements:
+
+```text
+- identify visible features
+- infer user actions
+- infer business rules from tests and domain code
+- mark confidence level
+- mark gaps and assumptions
+```
 
 ### File Outputs
 
@@ -124,18 +183,37 @@ Optional scoped invocation:
 mde_capture_architecture_from_codebase area=application-layer
 ```
 
-### Behavior
+### MCP / Script Steps
 
-The command looks for:
+```text
+mde.scan_folders
+mde.scan_import_graph
+mde.find_pattern_examples
+mde.scan_tests
+mde.scan_config
+```
 
-- folder/layer structure
-- dependency direction
-- command/query patterns
-- validation patterns
-- repository usage
-- error handling
-- transaction handling
-- test structure
+These steps write evidence files:
+
+```text
+.ai/evidence/folder-structure.json
+.ai/evidence/import-graph.json
+.ai/evidence/pattern-examples.json
+.ai/evidence/test-structure.json
+.ai/evidence/project-config.json
+```
+
+### AI Steps
+
+The AI reviews the evidence and creates a draft architecture/pattern model:
+
+```text
+- identify layers
+- identify dependency direction
+- identify common handler/controller/repository patterns
+- identify inconsistencies
+- recommend canonical patterns
+```
 
 ### File Outputs
 
@@ -178,11 +256,25 @@ Equivalent terminal form:
 > mde analyze
 ```
 
-### Behavior
+### MCP / Script Steps
 
-Runs static analysis over the codebase.
+```text
+mde.generate_codemap
+```
+
+Equivalent local script:
+
+```bash
+> mde analyze
+```
 
 For TypeScript, this can use the TypeScript compiler API or `ts-morph`.
+
+### AI Steps
+
+No AI is required to generate the code-map.
+
+The AI may only read the short summary to decide the next command.
 
 ### File Outputs
 
@@ -199,10 +291,6 @@ Files scanned: 214
 Artifacts found: 482
 Output: .ai/code-map.full.json
 ```
-
-### AI Needed?
-
-No. This should be deterministic tooling.
 
 ---
 
@@ -226,9 +314,25 @@ Optional filters:
 mde_generate_work_items_from_git_issues repo=AI-MDE/AI-for-SE label=enhancement
 ```
 
-### Behavior
+### MCP / Script Steps
 
-The command reads selected GitHub issues and creates structured work-item drafts.
+```text
+mde.github_fetch_issues
+mde.github_fetch_issue_comments
+mde.create_work_item_files
+```
+
+### AI Steps
+
+The AI normalizes each issue into a work-item:
+
+```text
+- summarize intent
+- identify scope
+- classify type: bug, feature, refactor, docs, infrastructure
+- identify missing information
+- suggest related models
+```
 
 ### File Outputs
 
@@ -243,12 +347,6 @@ The command reads selected GitHub issues and creates structured work-item drafts
 Generated 4 work-item drafts from GitHub issues.
 Output folder: .ai/work-items/
 ```
-
-### AI Needed?
-
-Maybe.
-
-Fetching issues is deterministic. Converting vague issue text into a structured work-item may require AI.
 
 ---
 
@@ -272,9 +370,25 @@ With scope:
 mde_define_work_item name=ApproveLeaveRequest entity=LeaveRequest operation=approve type=command
 ```
 
-### Behavior
+### MCP / Script Steps
 
-Creates the initial work-item file and captures known scope.
+```text
+mde.create_work_item
+mde.create_initial_plan
+mde.link_models
+```
+
+### AI Steps
+
+If the scope is vague, the AI normalizes it:
+
+```text
+- clarify goal
+- identify task type
+- identify likely model impact
+- identify open questions
+- draft initial micro-spec
+```
 
 ### File Outputs
 
@@ -290,12 +404,6 @@ Work-item created.
 Plan started.
 Next: run mde_review_work_item_scope
 ```
-
-### AI Needed?
-
-Maybe.
-
-If scope is explicit, this can be mostly deterministic. If scope is vague, AI helps normalize it.
 
 ---
 
@@ -313,17 +421,30 @@ This is the main planning checkpoint.
 mde_review_work_item_scope workItem=.ai/work-items/approve-leave-request.work-item.md
 ```
 
-### Behavior
+### MCP / Script Steps
 
-The command:
+```text
+mde.load_work_item
+mde.load_models
+mde.filter_codemap
+mde.select_candidate_files
+mde.select_skills
+```
 
-1. reads the work-item
-2. reads relevant models
-3. filters the code-map
-4. selects applicable skills
-5. identifies affected files
-6. develops an execution plan
-7. stops before execution
+### AI Steps
+
+The AI develops the plan:
+
+```text
+- inspect work-item scope
+- review relevant model context
+- inspect filtered code-map summary
+- identify affected files
+- identify affected models
+- produce implementation plan
+- mark risks and assumptions
+- stop before execution
+```
 
 ### File Outputs
 
@@ -342,10 +463,6 @@ Approval required before execution.
 Output: .ai/plans/approve-leave-request.plan.md
 ```
 
-### AI Needed?
-
-Yes. This requires judgment, scope interpretation, and planning.
-
 ---
 
 ## 7. `mde_approve_work_item`
@@ -354,9 +471,7 @@ Yes. This requires judgment, scope interpretation, and planning.
 
 Mark a reviewed work-item plan as approved for execution.
 
-This command does **not** execute the change by itself.
-
-It records human approval.
+This records human approval and enables execution.
 
 ### Invocation
 
@@ -364,14 +479,20 @@ It records human approval.
 mde_approve_work_item plan=.ai/plans/approve-leave-request.plan.md
 ```
 
-### Behavior
+### MCP / Script Steps
 
-The command:
+```text
+mde.verify_plan_exists
+mde.verify_plan_status
+mde.record_approval
+mde.mark_plan_approved
+```
 
-- verifies the plan exists
-- records approval metadata
-- marks the plan as approved
-- prepares it for a later execution command
+### AI Steps
+
+No AI reasoning is required.
+
+The human approval is the important action.
 
 ### File Outputs
 
@@ -388,9 +509,74 @@ Execution is now allowed.
 Approved by: <user>
 ```
 
-### Human Approval Required
+---
 
-Yes. This is the approval gate.
+## 8. `mde_execute_approved_work_item`
+
+### Purpose
+
+Execute an approved work-item using the selected AI IDE and local MDE toolchain.
+
+This command is not a future placeholder. It is part of the intended wired workflow.
+
+Execution is allowed only after `mde_approve_work_item` records approval.
+
+### Invocation
+
+```text
+mde_execute_approved_work_item plan=.ai/plans/approve-leave-request.plan.md
+```
+
+Optional:
+
+```text
+mde_execute_approved_work_item plan=.ai/plans/approve-leave-request.plan.md mode=supervised
+```
+
+### MCP / Script Steps
+
+```text
+mde.verify_approval
+mde.load_approved_plan
+mde.load_candidate_files
+mde.load_selected_skills
+mde.create_patch_checkpoint
+mde.run_validation
+```
+
+### AI Steps
+
+The AI IDE performs the adaptive source change:
+
+```text
+- read approved plan
+- inspect candidate files
+- apply only approved changes
+- keep changes inside approved scope
+- update tests
+- run validation
+- if validation fails, propose fix or stop
+- produce completion report
+```
+
+### File Outputs
+
+```text
+.ai/reports/approve-leave-request.completion-report.md
+.ai/patches/approve-leave-request.patch
+```
+
+### AI-visible Response
+
+```text
+Approved work-item executed.
+Validation completed.
+Completion report: .ai/reports/approve-leave-request.completion-report.md
+```
+
+### Safety Rule
+
+If the actual implementation requires changes outside the approved plan, the command must stop and request plan revision.
 
 ---
 
@@ -404,6 +590,7 @@ mde_generate_work_items_from_git_issues
 mde_define_work_item
 mde_review_work_item_scope
 mde_approve_work_item
+mde_execute_approved_work_item
 ```
 
 For day-to-day work, the common path is shorter:
@@ -413,38 +600,35 @@ mde_generate_codemap
 mde_define_work_item
 mde_review_work_item_scope
 mde_approve_work_item
+mde_execute_approved_work_item
 ```
 
 ---
 
 ## Approval Boundary
 
-Planning and approval are separate.
+Planning, approval, and execution are separate.
 
 ```text
-review scope / develop plan → human approval → execution allowed
+define work-item → review scope / develop plan → human approval → execute approved plan → validate
 ```
 
 No command should apply code changes before the plan is approved.
 
 ---
 
-## Possible Future Execution Command
-
-A later execution command may be added:
+## Command State Model
 
 ```text
-mde_execute_approved_work_item
+work-item: draft
+  → scoped
+  → planned
+  → approved
+  → executed
+  → validated
 ```
 
-That command would require:
-
-- approved plan
-- selected AI engine
-- validation rules
-- rollback or patch capture strategy
-
-Until then, `mde_approve_work_item` only approves the plan.
+Each command moves the work-item forward one controlled step.
 
 ---
 
