@@ -89,7 +89,7 @@ flowchart TD
 
 ## Models Produced
 
-M4 (Project Configuration), M5 (Codebase Visibility).
+M4 (Project Configuration), M6 (Codebase Model).
 
 ---
 
