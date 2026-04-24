@@ -32,6 +32,15 @@ AI produces and transforms artifacts
 human validates and aligns with system constraints
 ```
 
+## Additional Observation
+
+```text
+AI is often used as a code generator.
+
+Its real value emerges when it is used to explore,
+understand, and reason about systems.
+```
+
 ## Navigation
 
 [← Software Engineering](what-is-software-engineering.md) | [Next: Market Usage](ai-usage-patterns.md)
