@@ -20,13 +20,31 @@ The difference is how much of the flow is manual, scripted, integrated, or agent
 
 Use a general AI engine directly, such as ChatGPT, Claude, Gemini, or another model, and manually provide the relevant project context.
 
-### Inputs
+### How It Is Invoked
 
-- problem statement
-- task micro-spec
-- architecture guidance
-- relevant source files or snippets
-- project patterns
+There is no tool command. The user manually opens an AI chat and provides structured context.
+
+Example prompt:
+
+```text
+I am working in an existing Leave Management codebase.
+
+Use this task scope:
+- Add ApproveLeaveRequest
+- Manager only
+- Requester cannot approve own request
+- Only pending requests can be approved
+
+Use these project rules:
+- commands handle writes
+- domain entity owns state transitions
+- repositories handle persistence
+
+Here are the relevant files:
+[paste selected files]
+
+Produce a change plan first. Do not write code until the plan is approved.
+```
 
 ### Flow
 
@@ -75,6 +93,35 @@ Example skills:
 .ai/skills/extract-project-patterns.md
 ```
 
+### How It Is Invoked
+
+The user references the skill from an AI chat or IDE agent.
+
+Example prompt:
+
+```text
+Use .ai/skills/add-command.md.
+
+Task:
+Add ApproveLeaveRequest.
+
+Scope:
+- entity: LeaveRequest
+- operation: approve
+- only managers can approve
+- requester cannot approve own request
+- only pending requests can be approved
+
+Before editing, inspect two similar command handlers and follow the existing pattern.
+```
+
+If the AI tool supports custom skills, the skill can be registered with the tool and invoked by name:
+
+```text
+/use-skill add-command
+Task: Add ApproveLeaveRequest for LeaveRequest approval.
+```
+
 ### Flow
 
 ```text
@@ -110,15 +157,59 @@ User request
 
 ### Description
 
-Use repository commands to prepare context, generate code maps, filter scope, and validate task readiness.
+Use repository commands or a globally installed `mde` CLI to prepare context, generate code maps, filter scope, and validate task readiness.
 
-Example commands:
+### How It Is Invoked: Local Repository Commands
+
+Example local commands:
 
 ```bash
 npm run init-ai-mde
 npm run analyze
 npm run filter-code-map -- --entity LeaveRequest --operation approve
 npm run validate-task
+```
+
+### How It Is Invoked: Global MDE CLI
+
+The preferred AI-MDE product experience is a global install:
+
+```bash
+npm install -g @ai-mde/cli
+```
+
+Then the user runs:
+
+```bash
+mde
+```
+
+The CLI displays an interactive menu:
+
+```text
+AI-MDE
+
+? What do you want to do?
+  1. Initialize project AI context
+  2. Generate code-map
+  3. Extract project patterns
+  4. Create micro-spec
+  5. Run change request
+  6. Validate task context
+  7. Show project status
+```
+
+A direct command form is also possible:
+
+```bash
+mde init
+mde analyze
+mde patterns extract
+mde spec create --type command --name ApproveLeaveRequest
+mde codemap filter --entity LeaveRequest --operation approve
+mde change run --spec specs/approve-leave-request.md
+mde validate
+mde status
 ```
 
 ### Flow
@@ -138,12 +229,13 @@ user request
 - reduces manual context gathering
 - creates a clearer bridge between docs and execution
 - makes validation explicit
+- gives users a simple entry point: `mde`
 
 ### Weaknesses
 
 - requires scripts and maintenance
-- still needs a human or AI client to apply source changes
-- CLI alone does not understand business intent
+- still needs a human or AI client to apply source changes unless paired with an agent
+- CLI alone does not understand business intent unless connected to an AI engine
 
 ### Best For
 
@@ -166,6 +258,43 @@ The repo provides the agent with:
 - skills
 - micro-specs
 - code-map or filtered submap
+
+### How It Is Invoked
+
+First prepare context using the CLI:
+
+```bash
+mde analyze
+mde codemap filter --entity LeaveRequest --operation approve
+```
+
+Then ask the IDE agent:
+
+```text
+Use the AI-MDE context for this task.
+
+Read:
+- .ai/architecture.md
+- .ai/project-patterns.md
+- .ai/context/task.submap.json
+- .ai/context/task.files.txt
+- .ai/skills/add-command.md
+
+Task:
+Implement ApproveLeaveRequest from specs/approve-leave-request.md.
+
+Rules:
+- inspect candidate files before editing
+- apply minimal change
+- add/update tests
+- run validation after changes
+```
+
+With a command-capable IDE agent, the user may simply type:
+
+```text
+Run mde change for ApproveLeaveRequest and apply the edits.
+```
 
 ### Flow
 
@@ -217,6 +346,45 @@ filter_code_map
 create_micro_spec
 select_skill
 validate_task_context
+```
+
+### How It Is Invoked
+
+The MCP server is configured in the AI client.
+
+Example `.vscode/mcp.json` style configuration:
+
+```json
+{
+  "servers": {
+    "mde": {
+      "command": "mde-mcp",
+      "args": ["--workspace", "."]
+    }
+  }
+}
+```
+
+The user asks the AI client:
+
+```text
+Use the mde MCP server.
+Initialize project context, generate a code-map, and prepare a change request for ApproveLeaveRequest.
+```
+
+The AI client calls MCP tools such as:
+
+```text
+mde.generate_code_map()
+mde.filter_code_map({ entity: "LeaveRequest", operation: "approve" })
+mde.select_skill({ taskType: "command" })
+mde.validate_task_context()
+```
+
+A CLI wrapper can also start the MCP server:
+
+```bash
+mde mcp start
 ```
 
 ### Flow
@@ -272,6 +440,59 @@ The agent coordinates:
 - validation
 - completion report
 
+### How It Is Invoked
+
+Interactive global CLI:
+
+```bash
+mde
+```
+
+User selects:
+
+```text
+? What do you want to do?
+  Run change request
+```
+
+Then answers prompts:
+
+```text
+Change name: ApproveLeaveRequest
+Entity: LeaveRequest
+Operation: approve
+Task type: command
+AI engine: claude-code
+Apply edits: yes
+Run validation: yes
+```
+
+Direct command form:
+
+```bash
+mde change run \
+  --name ApproveLeaveRequest \
+  --entity LeaveRequest \
+  --operation approve \
+  --skill add-command \
+  --engine claude-code \
+  --apply \
+  --validate
+```
+
+Expected agent sequence:
+
+```text
+1. create or load micro-spec
+2. generate or refresh code-map
+3. filter code-map
+4. select skill
+5. inspect source files
+6. apply edits
+7. run tests/build
+8. produce completion report
+```
+
 ### Flow
 
 ```text
@@ -309,14 +530,14 @@ change request
 
 ## Comparison
 
-| Option | Effort | Control | Automation | Best Use |
-|---|---:|---:|---:|---|
-| Plain AI Chat | Low | Low | Low | Thinking, small tasks |
-| Skills Only | Low-Medium | Medium | Low | Repeatable guidance |
-| Commands / CLI | Medium | Medium-High | Medium | Project discipline |
-| IDE Agent | Medium | Medium | Medium-High | Daily coding |
-| MCP Integration | High | High | High | Platform integration |
-| Agent-Orchestrated | High | Medium-High | Very High | Mature automation |
+| Option | Invocation | Effort | Control | Automation | Best Use |
+|---|---|---:|---:|---:|---|
+| Plain AI Chat | manual prompt | Low | Low | Low | Thinking, small tasks |
+| Skills Only | prompt references skill | Low-Medium | Medium | Low | Repeatable guidance |
+| Commands / CLI | `mde` or `npm run ...` | Medium | Medium-High | Medium | Project discipline |
+| IDE Agent | IDE prompt + repo context | Medium | Medium | Medium-High | Daily coding |
+| MCP Integration | AI calls MCP tools | High | High | High | Platform integration |
+| Agent-Orchestrated | `mde change run ...` | High | Medium-High | Very High | Mature automation |
 
 ---
 
@@ -334,6 +555,30 @@ Start simple and add structure only when needed.
 ```
 
 This avoids forcing full complexity upfront while still giving a path toward governed automation.
+
+---
+
+## Preferred Product Experience
+
+For AI-MDE, the preferred user experience is:
+
+```bash
+npm install -g @ai-mde/cli
+mde
+```
+
+Then the user chooses from a menu rather than memorizing commands.
+
+Direct commands remain available for automation and scripts.
+
+```bash
+mde init
+mde analyze
+mde patterns extract
+mde spec create
+mde change run
+mde validate
+```
 
 ---
 
