@@ -58,10 +58,14 @@ Behind it, the AI client may call MCP tools that wrap local scripts.
 Example:
 
 ```text
-mde_generate_codemap
-  → MCP tool: mde.generate_codemap
-  → local script: mde analyze
-  → output: .ai/code-map.full.json
+mde_scan_codebase
+  → MCP tool: mde.scan_codebase
+  → local scripts:
+      - mde analyze
+      - mde detect-config
+  → outputs:
+      - .ai/code-map.full.json
+      - .ai/models/m4-project-configuration.md
   → AI-visible summary only
 ```
 
@@ -79,9 +83,10 @@ MCP connects the AI IDE to the local MDE toolchain.
 
 | Command | Purpose | Script Step | AI Step | Main Output |
 |---|---|---|---|---|
+| `mde_scan_codebase` | Scan project and generate code-map + project config | static analysis, folder/package/config scan | summarize findings if needed | M6 Codebase Model + M4 Project Configuration |
+| `mde_understand_data_model` | Understand logical/physical data model from database/schema | inspect DB/schema/migrations/ORM | infer entities, relationships, rules | M5 Data Model draft |
 | `mde_capture_requirements_from_codebase` | Infer draft requirements from existing code | collect routes, handlers, tests, docs | infer requirements and gaps | M1 Requirements draft |
 | `mde_capture_architecture_from_codebase` | Infer architecture and patterns from existing code | collect structure, dependencies, examples | normalize architecture and patterns | M3 Architecture & Patterns draft |
-| `mde_generate_codemap` | Generate structural code-map | static analysis | none, except summary interpretation | M6 Codebase Model |
 | `mde_generate_work_items_from_git_issues` | Convert GitHub issues into work-items | fetch issues | normalize vague issues into work-items | Work-item list |
 | `mde_define_work_item` | Start a new work-item / plan | create work-item artifact | normalize scope if needed | Work-item draft |
 | `mde_review_work_item_scope` | Review scope and develop plan | load models, filter code-map | plan affected changes | Approved-ready plan |
@@ -90,7 +95,173 @@ MCP connects the AI IDE to the local MDE toolchain.
 
 ---
 
-## 1. `mde_capture_requirements_from_codebase`
+## 1. `mde_scan_codebase`
+
+### Purpose
+
+Scan the existing project and generate the two baseline project-understanding artifacts:
+
+```text
+M6 Codebase Model
+M4 Project Configuration
+```
+
+This is the first task for an existing codebase.
+
+### Invocation
+
+```text
+mde_scan_codebase
+```
+
+Equivalent terminal form:
+
+```bash
+> mde scan
+```
+
+### MCP / Script Steps
+
+```text
+mde.scan_folders
+mde.scan_package_files
+mde.scan_tsconfig_or_language_config
+mde.scan_scripts
+mde.generate_codemap
+mde.detect_project_config
+```
+
+For TypeScript, code-map generation can use the TypeScript compiler API or `ts-morph`.
+
+### File Outputs
+
+```text
+.ai/code-map.full.json
+.ai/models/m4-project-configuration.md
+.ai/reports/codebase-scan-summary.md
+```
+
+### AI Steps
+
+AI is not required for the scan itself.
+
+AI may be used only to summarize the findings or flag unusual structure:
+
+```text
+- likely stack
+- likely source folders
+- likely test folders
+- detected scripts
+- missing config
+- unusual folder patterns
+```
+
+### AI-visible Response
+
+```text
+Codebase scan completed.
+Generated:
+- .ai/code-map.full.json
+- .ai/models/m4-project-configuration.md
+Summary: .ai/reports/codebase-scan-summary.md
+```
+
+---
+
+## 2. `mde_understand_data_model`
+
+### Purpose
+
+Understand the system data model by reading database and persistence artifacts.
+
+This is separate from code scanning because the data model may live in:
+
+- live database schema
+- SQL DDL files
+- migrations
+- ORM models
+- schema files
+- seed data
+- database views/triggers
+
+The output contributes to:
+
+```text
+M5 Design & Data Model
+```
+
+### Invocation
+
+```text
+mde_understand_data_model
+```
+
+Optional scoped invocation:
+
+```text
+mde_understand_data_model source=database connection=dev
+mde_understand_data_model source=migrations path=db/migrations
+mde_understand_data_model source=orm path=src/infrastructure/entities
+```
+
+### MCP / Script Steps
+
+```text
+mde.detect_database_config
+mde.inspect_database_schema
+mde.scan_migrations
+mde.scan_orm_models
+mde.scan_sql_files
+mde.scan_views_and_triggers
+```
+
+These steps write raw evidence files:
+
+```text
+.ai/evidence/database-schema.json
+.ai/evidence/migrations-index.json
+.ai/evidence/orm-models.json
+.ai/evidence/sql-files.json
+.ai/evidence/db-views-triggers.json
+```
+
+### AI Steps
+
+The AI reads the evidence summaries and creates a model-level interpretation:
+
+```text
+- identify logical entities
+- identify attributes
+- identify relationships
+- distinguish business relationships from physical foreign keys
+- identify lifecycle/status fields
+- identify database-enforced rules
+- identify triggers, audit behavior, and derived data
+- identify gaps between code model and database model
+```
+
+### File Outputs
+
+```text
+.ai/models/m5-data-model.draft.md
+.ai/reports/data-model-understanding-report.md
+```
+
+### AI-visible Response
+
+```text
+Data model draft created.
+Output: .ai/models/m5-data-model.draft.md
+Review needed: yes
+```
+
+### Human Review Required
+
+Yes. The AI can infer relationships and intent from schema evidence, but the logical data model must be reviewed.
+
+---
+
+## 3. `mde_capture_requirements_from_codebase`
 
 ### Purpose
 
@@ -163,7 +334,7 @@ Yes. AI is inferring intent from implementation, so the result must be reviewed.
 
 ---
 
-## 2. `mde_capture_architecture_from_codebase`
+## 4. `mde_capture_architecture_from_codebase`
 
 ### Purpose
 
@@ -236,65 +407,7 @@ Yes. The AI extracts and normalizes, but the architect decides what becomes cano
 
 ---
 
-## 3. `mde_generate_codemap`
-
-### Purpose
-
-Generate a structural model of the existing codebase.
-
-This is M6 Codebase Model.
-
-### Invocation
-
-```text
-mde_generate_codemap
-```
-
-Equivalent terminal form:
-
-```bash
-> mde analyze
-```
-
-### MCP / Script Steps
-
-```text
-mde.generate_codemap
-```
-
-Equivalent local script:
-
-```bash
-> mde analyze
-```
-
-For TypeScript, this can use the TypeScript compiler API or `ts-morph`.
-
-### AI Steps
-
-No AI is required to generate the code-map.
-
-The AI may only read the short summary to decide the next command.
-
-### File Outputs
-
-```text
-.ai/code-map.full.json
-.ai/reports/code-map-summary.md
-```
-
-### AI-visible Response
-
-```text
-Code-map generated.
-Files scanned: 214
-Artifacts found: 482
-Output: .ai/code-map.full.json
-```
-
----
-
-## 4. `mde_generate_work_items_from_git_issues`
+## 5. `mde_generate_work_items_from_git_issues`
 
 ### Purpose
 
@@ -350,7 +463,7 @@ Output folder: .ai/work-items/
 
 ---
 
-## 5. `mde_define_work_item`
+## 6. `mde_define_work_item`
 
 ### Purpose
 
@@ -407,7 +520,7 @@ Next: run mde_review_work_item_scope
 
 ---
 
-## 6. `mde_review_work_item_scope`
+## 7. `mde_review_work_item_scope`
 
 ### Purpose
 
@@ -465,7 +578,7 @@ Output: .ai/plans/approve-leave-request.plan.md
 
 ---
 
-## 7. `mde_approve_work_item`
+## 8. `mde_approve_work_item`
 
 ### Purpose
 
@@ -511,13 +624,11 @@ Approved by: <user>
 
 ---
 
-## 8. `mde_execute_approved_work_item`
+## 9. `mde_execute_approved_work_item`
 
 ### Purpose
 
 Execute an approved work-item using the selected AI IDE and local MDE toolchain.
-
-This command is not a future placeholder. It is part of the intended wired workflow.
 
 Execution is allowed only after `mde_approve_work_item` records approval.
 
@@ -582,10 +693,18 @@ If the actual implementation requires changes outside the approved plan, the com
 
 ## Suggested Workflow
 
+For initial project understanding:
+
 ```text
-mde_capture_requirements_from_codebase
+mde_scan_codebase
+mde_understand_data_model
 mde_capture_architecture_from_codebase
-mde_generate_codemap
+mde_capture_requirements_from_codebase
+```
+
+For issue-driven planning:
+
+```text
 mde_generate_work_items_from_git_issues
 mde_define_work_item
 mde_review_work_item_scope
@@ -593,10 +712,10 @@ mde_approve_work_item
 mde_execute_approved_work_item
 ```
 
-For day-to-day work, the common path is shorter:
+For day-to-day work:
 
 ```text
-mde_generate_codemap
+mde_scan_codebase
 mde_define_work_item
 mde_review_work_item_scope
 mde_approve_work_item
