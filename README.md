@@ -4,6 +4,36 @@ AI-MDE-Light is a code-first, skill-driven approach to AI-assisted software engi
 
 It is not full lifecycle MDE. It keeps the useful discipline of AI-MDE while reducing ceremony for existing codebases, fixes, enhancements, and integrations.
 
+---
+
+## 📚 Documentation (Wiki Style)
+
+Start here:
+
+➡️ [Documentation Home](docs/Home.md)
+
+### Core Pages
+
+- [AI-MDE-Light Overview](docs/ai-mde-light.md)
+- [Architecture Guidance](.ai/architecture.md)
+- [Project Patterns](.ai/project-patterns.md)
+- [Micro-spec Template](specs/micro-spec.template.md)
+
+### Skills
+
+- [.ai/skills/add-command.md](.ai/skills/add-command.md)
+- [.ai/skills/fix-bug.md](.ai/skills/fix-bug.md)
+- [.ai/skills/extract-project-patterns.md](.ai/skills/extract-project-patterns.md)
+- [.ai/skills/integrate-existing-code.md](.ai/skills/integrate-existing-code.md)
+
+### Tools
+
+- [Analyze Codebase](tools/analyze-codebase.ts)
+- [Filter Code Map](tools/filter-code-map.ts)
+- [Validate Task](tools/validate-task.ts)
+
+---
+
 ## Core Idea
 
 ```text
@@ -34,6 +64,8 @@ Scripts = inspect, generate scaffolds, validate, enforce
 Skills  = repeatable engineering playbooks
 ```
 
+---
+
 ## Repository Structure
 
 ```text
@@ -55,7 +87,10 @@ tools/
 
 docs/
   ai-mde-light.md
+  Home.md
 ```
+
+---
 
 ## Workflow
 
@@ -66,6 +101,8 @@ docs/
 5. Apply a minimal change.
 6. Run validation.
 7. Update the code-map and project patterns when needed.
+
+---
 
 ## Modes
 
@@ -84,6 +121,8 @@ Use AI as the adaptive modifier.
 ```text
 micro-spec → code-map → inspect source → AI edit → validation
 ```
+
+---
 
 ## Status
 
