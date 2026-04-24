@@ -1,36 +1,56 @@
 # AI-MDE / AI-for-SE Documentation Home
 
-This documentation set is organized like a small wiki, but stored as regular Markdown files inside the repository so it works directly in GitHub.
+This documentation set is organized like a small wiki, but now follows a problem-first structure.
 
-## Navigation
+---
 
-- [AI-MDE-Light Overview](ai-mde-light.md)
+## 1. Problem & Market Observation
+
+- [Problem Statement](problem-statement.md)
+- [AI Usage Patterns (Market)](ai-usage-patterns.md)
+
+---
+
+## 2. Scenarios & Behavior
+
 - [Use Cases](use-cases.md)
 - [Diagrams](diagrams.md)
+
+---
+
+## 3. System & Structure
+
+- [AI-MDE-Light Overview](ai-mde-light.md)
 - [Architecture Guidance](../.ai/architecture.md)
 - [Project Patterns](../.ai/project-patterns.md)
 - [App Configuration](../.ai/app.config.json)
 - [Micro-spec Template](../specs/micro-spec.template.md)
 
-## Skills
+---
+
+## 4. Execution Layer
+
+### Skills
 
 - [Add Command](../.ai/skills/add-command.md)
 - [Fix Bug Without Architecture Drift](../.ai/skills/fix-bug.md)
 - [Extract Project Patterns](../.ai/skills/extract-project-patterns.md)
 - [Integrate With Existing Code](../.ai/skills/integrate-existing-code.md)
 
-## Tools
+### Tools
 
 - [Analyze Codebase](../tools/analyze-codebase.ts)
 - [Filter Code Map](../tools/filter-code-map.ts)
 - [Validate Task](../tools/validate-task.ts)
 
+---
+
 ## Suggested Reading Order
 
-1. Start with the [AI-MDE-Light Overview](ai-mde-light.md).
-2. Read the [Use Cases](use-cases.md).
-3. Review the [Diagrams](diagrams.md).
-4. Read the [Architecture Guidance](../.ai/architecture.md).
-5. Review the [Micro-spec Template](../specs/micro-spec.template.md).
-6. Study the skills under `.ai/skills`.
-7. Use the tools under `tools/` to generate and filter the code-map.
+1. Problem Statement
+2. AI Usage Patterns (Market)
+3. Use Cases
+4. Diagrams
+5. AI-MDE-Light Overview
+6. Architecture + Patterns
+7. Skills and Tools
