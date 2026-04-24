@@ -1,24 +1,44 @@
 # AI-MDE / AI-for-SE Documentation Home
 
-This documentation set is organized like a small wiki, but now follows a problem-first structure.
+This documentation set is organized like a small wiki, following a problem-first structure.
 
 ---
 
-## 1. Problem & Market Observation
+## 1. Foundations
 
+- [What Is AI](what-is-ai.md)
+- [What Is Software Engineering](what-is-software-engineering.md)
+
+---
+
+## 2. Intersection
+
+- [AI in Software Engineering](ai-in-software-engineering.md)
+
+---
+
+## 3. Market Usage
+
+- [AI Usage Patterns (Scenarios)](ai-usage-patterns.md)
+
+---
+
+## 4. Gaps & Challenges
+
+- [Gaps & Challenges](gaps-and-challenges.md)
+- [Implications](implications.md)
 - [Problem Statement](problem-statement.md)
-- [AI Usage Patterns (Market)](ai-usage-patterns.md)
 
 ---
 
-## 2. Scenarios & Behavior
+## 5. Scenarios & Behavior
 
 - [Use Cases](use-cases.md)
 - [Diagrams](diagrams.md)
 
 ---
 
-## 3. System & Structure
+## 6. System & Structure
 
 - [AI-MDE-Light Overview](ai-mde-light.md)
 - [Architecture Guidance](../.ai/architecture.md)
@@ -28,7 +48,7 @@ This documentation set is organized like a small wiki, but now follows a problem
 
 ---
 
-## 4. Execution Layer
+## 7. Execution Layer
 
 ### Skills
 
@@ -47,10 +67,15 @@ This documentation set is organized like a small wiki, but now follows a problem
 
 ## Suggested Reading Order
 
-1. Problem Statement
-2. AI Usage Patterns (Market)
-3. Use Cases
-4. Diagrams
-5. AI-MDE-Light Overview
-6. Architecture + Patterns
-7. Skills and Tools
+1. What Is AI
+2. What Is Software Engineering
+3. AI in Software Engineering
+4. AI Usage Patterns (Scenarios)
+5. Gaps & Challenges
+6. Implications
+7. Problem Statement
+8. Use Cases
+9. Diagrams
+10. AI-MDE-Light Overview
+11. Architecture + Patterns
+12. Skills and Tools
