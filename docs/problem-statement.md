@@ -1,6 +1,6 @@
 # Problem Statement
 
-[← Home](Home.md) | [Next: AI Usage Survey](ai-usage-patterns.md)
+[Home](Home.md) | [Next: What Is AI](what-is-ai.md)
 
 Software engineers are adopting AI tools quickly, but most usage remains informal, local, and difficult to control at scale.
 
@@ -60,14 +60,20 @@ How do we preserve engineering discipline while using AI to accelerate work?
 
 ---
 
-## Scope of This Repository
+## Scope
 
-This repository explores that problem space.
+This repository explores that problem space. It begins with foundations (what AI is, what software engineering is), surveys how engineers currently use AI tools, identifies recurring gaps, and reasons about what must exist for structured AI-assisted engineering.
 
-It begins with a survey of how engineers currently use AI tools, then identifies recurring gaps, and only later introduces one possible structured approach.
+### What is not in scope
+
+- AI model training or fine-tuning
+- Prompt engineering techniques
+- CI/CD pipeline design
+- Team workflow or process management
+- Specific tool or vendor recommendations
 
 ---
 
 ## Navigation
 
-[← Home](Home.md) | [Next: AI Usage Survey](ai-usage-patterns.md)
+[Home](Home.md) | [Next: What Is AI](what-is-ai.md)

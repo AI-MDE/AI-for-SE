@@ -1,83 +1,71 @@
-# AI-MDE / AI-for-SE Documentation Home
+# AI-for-SE Documentation Home
 
-This documentation set is organized like a small wiki, following a problem-first structure.
+This documentation follows a problem-first structure. Start with the problem statement, build foundations, observe how AI is used, identify what breaks, and reason about what must exist.
 
----
-
-## 1. Foundations
-
-- [What Is AI](what-is-ai.md)
-- [What Is Software Engineering](what-is-software-engineering.md)
+**Audience:** Software engineers, architects, and team leads evaluating how to use AI tools without sacrificing system coherence.
 
 ---
 
-## 2. Intersection
+## 1. The Problem
 
-- [AI in Software Engineering](ai-in-software-engineering.md)
-
----
-
-## 3. Market Usage
-
-- [AI Usage Patterns (Scenarios)](ai-usage-patterns.md)
+- [Problem Statement](problem-statement.md) — the central thesis
 
 ---
 
-## 4. Gaps & Challenges
+## 2. Foundations
 
-- [Gaps & Challenges](gaps-and-challenges.md)
-- [Implications](implications.md)
-- [Required Components](required-components.md)
-- [Problem Statement](problem-statement.md)
+- [What Is AI](what-is-ai.md) — LLM capabilities relevant to engineering
+- [What Is Software Engineering](what-is-software-engineering.md) — the discipline AI must serve
 
 ---
 
-## 5. Scenarios & Behavior
+## 3. Intersection
 
-- [Use Cases](use-cases.md)
-- [Diagrams](diagrams.md)
-
----
-
-## 6. System & Structure
-
-- [AI-MDE-Light Overview](ai-mde-light.md)
-- [Architecture Guidance](../.ai/architecture.md)
-- [Project Patterns](../.ai/project-patterns.md)
-- [App Configuration](../.ai/app.config.json)
-- [Micro-spec Template](../specs/micro-spec.template.md)
+- [AI in Software Engineering](ai-in-software-engineering.md) — how they meet in practice
 
 ---
 
-## 7. Execution Layer
+## 4. Market Usage
 
-### Skills
+- [AI Usage Patterns](ai-usage-patterns.md) — how engineers use AI today, by scenario
 
-- [Add Command](../.ai/skills/add-command.md)
-- [Fix Bug Without Architecture Drift](../.ai/skills/fix-bug.md)
-- [Extract Project Patterns](../.ai/skills/extract-project-patterns.md)
-- [Integrate With Existing Code](../.ai/skills/integrate-existing-code.md)
+---
 
-### Tools
+## 5. Gaps and Analysis
 
-- [Analyze Codebase](../tools/analyze-codebase.ts)
-- [Filter Code Map](../tools/filter-code-map.ts)
-- [Validate Task](../tools/validate-task.ts)
+- [Gaps and Challenges](gaps-and-challenges.md) — what breaks across scenarios
+- [Required Capabilities](required-capabilities.md) — what a structured approach must provide
+- [Required Components](required-components.md) — what must be built
+
+---
+
+## 6. Use Cases
+
+- [Use Cases](use-cases.md) — index of concrete task flows, each with its own diagram
 
 ---
 
 ## Suggested Reading Order
 
-1. What Is AI
-2. What Is Software Engineering
-3. AI in Software Engineering
-4. AI Usage Patterns (Scenarios)
-5. Gaps & Challenges
-6. Implications
-7. Required Components
-8. Problem Statement
+1. Problem Statement
+2. What Is AI
+3. What Is Software Engineering
+4. AI in Software Engineering
+5. AI Usage Patterns
+6. Gaps and Challenges
+7. Required Capabilities
+8. Required Components
 9. Use Cases
-10. Diagrams
-11. AI-MDE-Light Overview
-12. Architecture + Patterns
-13. Skills and Tools
+
+---
+
+## Non-Goals
+
+This repository does not address:
+
+- AI model training or fine-tuning
+- Prompt engineering techniques
+- CI/CD pipeline design
+- Team workflow or process management
+- Specific tool or vendor recommendations
+- Testing strategy beyond validation of AI-produced changes

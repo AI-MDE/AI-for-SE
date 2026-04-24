@@ -1,6 +1,6 @@
 # AI in Software Engineering
 
-[← Software Engineering](what-is-software-engineering.md) | [Next: Market Usage](ai-usage-patterns.md)
+[← Software Engineering](what-is-software-engineering.md) | [Next: Usage Patterns](ai-usage-patterns.md)
 
 This section describes how AI and software engineering meet in practice.
 
@@ -43,4 +43,4 @@ understand, and reason about systems.
 
 ## Navigation
 
-[← Software Engineering](what-is-software-engineering.md) | [Next: Market Usage](ai-usage-patterns.md)
+[← Software Engineering](what-is-software-engineering.md) | [Next: Usage Patterns](ai-usage-patterns.md)
