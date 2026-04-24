@@ -2,7 +2,7 @@
 
 [← Required Capabilities](required-capabilities.md) | [Next: Use Cases](use-cases.md)
 
-Based on the [required capabilities](required-capabilities.md), these are the knowledge structures a structured approach needs. This is not a solution or framework it is a decomposition of what must exist, regardless of implementation.
+Based on the [required capabilities](required-capabilities.md), these are the knowledge structures a structured approach needs. This is not a solution or framework; it is a decomposition of what must exist, regardless of implementation.
 
 Models are the meta-level knowledge structures that give AI and tooling a shared understanding of the system. They persist across tasks and interactions. [Use cases](use-cases.md) describe the activities that consume them.
 
@@ -90,12 +90,12 @@ Not all models are needed from day one. The table below shows when each model en
 
 | Model | When | Effort | Notes |
 |---|---|---|---|
-| M6. Codebase Model | At start | Automated  | Run static analysis. No human effort. |
-| M3. Architecture & Patterns | At start| Minimal  - AI assisted  | Even a half-page of layering rules and naming conventions is enough to begin. Refine over time. |
-| M4. Project Configuration | At start| Minimal -AI assisted | Folder structure, stack, commands. Usually already known. |
-| M5. Design & Data Model | Incremental | Per change -AI assisted| Grows with the system. Each new feature or entity adds to it. Does not need to be complete upfront. |
-| M1. Requirements & Docs | When desired | Optional -AI assisted| Valuable but not a prerequisite. Many teams start without formal requirements and add them as clarity emerges. |
-| M2. Scope / Features | When desired | Optional -AI assisted| Helps prevent scope creep and gives AI context, but the system works without it. |
+| M6. Codebase Model | At start | Automated | Run static analysis. No human effort. |
+| M3. Architecture & Patterns | At start | Minimal - AI assisted | Even a half-page of layering rules and naming conventions is enough to begin. Refine over time. |
+| M4. Project Configuration | At start | Minimal - AI assisted | Folder structure, stack, commands. Usually already known. |
+| M5. Design & Data Model | Incremental | Per change - AI assisted | Grows with the system. Each new feature or entity adds to it. Does not need to be complete upfront. |
+| M1. Requirements & Docs | When desired | Optional - AI assisted | Valuable but not a prerequisite. Many teams start without formal requirements and add them as clarity emerges. |
+| M2. Scope / Features | When desired | Optional - AI assisted | Helps prevent scope creep and gives AI context, but the system works without it. |
 
 ### Practical starting point
 
