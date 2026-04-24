@@ -9,6 +9,7 @@ This documentation set is organized like a small wiki, but stored as regular Mar
 - [Project Patterns](../.ai/project-patterns.md)
 - [App Configuration](../.ai/app.config.json)
 - [Micro-spec Template](../specs/micro-spec.template.md)
+- [Diagrams](diagrams.md)
 
 ## Skills
 
