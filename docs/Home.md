@@ -5,11 +5,12 @@ This documentation set is organized like a small wiki, but stored as regular Mar
 ## Navigation
 
 - [AI-MDE-Light Overview](ai-mde-light.md)
+- [Use Cases](use-cases.md)
+- [Diagrams](diagrams.md)
 - [Architecture Guidance](../.ai/architecture.md)
 - [Project Patterns](../.ai/project-patterns.md)
 - [App Configuration](../.ai/app.config.json)
 - [Micro-spec Template](../specs/micro-spec.template.md)
-- [Diagrams](diagrams.md)
 
 ## Skills
 
@@ -27,7 +28,9 @@ This documentation set is organized like a small wiki, but stored as regular Mar
 ## Suggested Reading Order
 
 1. Start with the [AI-MDE-Light Overview](ai-mde-light.md).
-2. Read the [Architecture Guidance](../.ai/architecture.md).
-3. Review the [Micro-spec Template](../specs/micro-spec.template.md).
-4. Study the skills under `.ai/skills`.
-5. Use the tools under `tools/` to generate and filter the code-map.
+2. Read the [Use Cases](use-cases.md).
+3. Review the [Diagrams](diagrams.md).
+4. Read the [Architecture Guidance](../.ai/architecture.md).
+5. Review the [Micro-spec Template](../specs/micro-spec.template.md).
+6. Study the skills under `.ai/skills`.
+7. Use the tools under `tools/` to generate and filter the code-map.
