@@ -1,0 +1,31 @@
+{
+  "name": "ai-mde-light-starter",
+  "stack": "node-typescript-express",
+  "language": "typescript",
+  "paths": {
+    "presentation": "src/presentation",
+    "controllers": "src/presentation/controllers",
+    "application": "src/application",
+    "commands": "src/application/commands",
+    "queries": "src/application/queries",
+    "domain": "src/domain",
+    "infrastructure": "src/infrastructure",
+    "repositories": "src/infrastructure/repositories",
+    "tests": "test",
+    "skills": ".ai/skills",
+    "context": ".ai/context",
+    "specs": "specs"
+  },
+  "commands": {
+    "build": "npm run build",
+    "test": "npm test",
+    "analyze": "npm run analyze",
+    "filterCodeMap": "npm run filter-code-map",
+    "validateTask": "npm run validate-task"
+  },
+  "artifacts": {
+    "fullCodeMap": ".ai/code-map.full.json",
+    "taskSubmap": ".ai/context/task.submap.json",
+    "taskFiles": ".ai/context/task.files.txt"
+  }
+}

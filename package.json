@@ -1,0 +1,19 @@
+{
+  "name": "ai-mde-light",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-MDE-Light starter repository for skill-driven codebase integration.",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "analyze": "tsx tools/analyze-codebase.ts",
+    "filter-code-map": "tsx tools/filter-code-map.ts",
+    "validate-task": "tsx tools/validate-task.ts",
+    "test": "echo \"No tests yet\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-morph": "^25.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

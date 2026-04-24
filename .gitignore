@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+.ai/code-map.full.json
+.ai/context/*.json
+.ai/context/*.txt
+.env
