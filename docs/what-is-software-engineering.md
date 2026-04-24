@@ -2,6 +2,15 @@
 
 [← AI](what-is-ai.md) | [Next: Intersection](ai-in-software-engineering.md)
 
+## Positioning
+
+```text
+Software engineering is not the act of writing code.
+
+It is the act of understanding problems, modeling domains,
+designing systems, and ensuring they evolve correctly over time.
+```
+
 Software engineering is the discipline of building and evolving systems under constraints:
 
 - Correctness
@@ -21,8 +30,10 @@ Software engineering is the discipline of building and evolving systems under co
 ## Implication
 
 ```text
-Software engineering is about preserving coherence over time,
-not just producing code.
+Coding is an output of engineering—not the discipline itself.
+
+The challenge is not producing code,
+but maintaining system coherence over time.
 ```
 
 ## Navigation
