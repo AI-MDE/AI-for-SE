@@ -16,6 +16,14 @@ def workspace_root() -> Path:
     return Path(os.environ.get("MDE_WORKSPACE", ".")).resolve()
 
 
+def mde_dir() -> Path:
+    return workspace_root() / ".mde"
+
+
+def skills_dir() -> Path:
+    return workspace_root() / ".ai" / "skills"
+
+
 def ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
@@ -70,13 +78,17 @@ def slugify(value: str) -> str:
     return cleaned.strip("-") or "work-item"
 
 
+def mde_path(*parts: str) -> Path:
+    return mde_dir().joinpath(*parts)
+
+
 @mcp.tool()
 def mde_scan_codebase() -> Dict[str, Any]:
-    """Scan codebase and generate baseline M4 project configuration and M6 code-map artifacts."""
+    """Scan codebase and generate baseline project configuration and code-map artifacts."""
     root = workspace_root()
-    ai_dir = root / ".ai"
-    ensure_dir(ai_dir / "models")
-    ensure_dir(ai_dir / "reports")
+    base = mde_dir()
+    ensure_dir(base / "models")
+    ensure_dir(base / "reports")
 
     package_json = root / "package.json"
     tsconfig = root / "tsconfig.json"
@@ -110,9 +122,10 @@ def mde_scan_codebase() -> Dict[str, Any]:
         "hasTsConfig": tsconfig.exists(),
         "scripts": scripts,
         "dependencies": dependencies,
+        "skillsDir": str(skills_dir().relative_to(root)) if skills_dir().exists() else ".ai/skills",
     }
 
-    write_json(ai_dir / "models" / "m4-project-configuration.json", project_config)
+    write_json(base / "models" / "project-configuration.json", project_config)
 
     analyze_result = run_command(["npm", "run", "analyze"], cwd=root) if package_json.exists() else {
         "ok": False,
@@ -120,14 +133,20 @@ def mde_scan_codebase() -> Dict[str, Any]:
         "stderr": "package.json not found; skipped npm run analyze",
     }
 
+    legacy_code_map = root / ".ai" / "code-map.full.json"
+    target_code_map = base / "models" / "codebase-model.json"
+    if legacy_code_map.exists():
+        ensure_dir(target_code_map.parent)
+        target_code_map.write_text(legacy_code_map.read_text(encoding="utf-8"), encoding="utf-8")
+
     report = f"""# Codebase Scan Summary
 
 Generated: {now_iso()}
 
 ## Outputs
 
-- `.ai/models/m4-project-configuration.json`
-- `.ai/code-map.full.json` if analyzer succeeded
+- `.mde/models/project-configuration.json`
+- `.mde/models/codebase-model.json` if analyzer succeeded
 
 ## Analyzer Result
 
@@ -139,30 +158,32 @@ returncode: {analyze_result.get('returncode')}
 ## Notes
 
 This command is artifact-first. Full artifacts are written locally; only this summary is returned to the AI.
+
+Skills, if present, live under `.ai/skills/`.
 """
-    write_text(ai_dir / "reports" / "codebase-scan-summary.md", report)
+    write_text(base / "reports" / "codebase-scan-summary.md", report)
 
     return {
         "status": "completed",
         "workspace": str(root),
         "outputs": [
-            ".ai/models/m4-project-configuration.json",
-            ".ai/reports/codebase-scan-summary.md",
-            ".ai/code-map.full.json",
+            ".mde/models/project-configuration.json",
+            ".mde/reports/codebase-scan-summary.md",
+            ".mde/models/codebase-model.json",
         ],
         "analyzeOk": analyze_result.get("ok"),
-        "message": "Codebase scan completed. Large artifacts were written to local files.",
+        "message": "Codebase scan completed. MDE artifacts were written to .mde/. Skills remain under .ai/skills/.",
     }
 
 
 @mcp.tool()
 def mde_understand_data_model(source: str = "auto", path: str = "") -> Dict[str, Any]:
-    """Inspect database/schema artifacts and create a draft M5 data model."""
+    """Inspect database/schema artifacts and create a draft data model."""
     root = workspace_root()
-    ai_dir = root / ".ai"
-    ensure_dir(ai_dir / "models")
-    ensure_dir(ai_dir / "evidence")
-    ensure_dir(ai_dir / "reports")
+    base = mde_dir()
+    ensure_dir(base / "models")
+    ensure_dir(base / "evidence")
+    ensure_dir(base / "reports")
 
     candidates: List[str] = []
     search_roots = [root / path] if path else [root]
@@ -184,9 +205,9 @@ def mde_understand_data_model(source: str = "auto", path: str = "") -> Dict[str,
         "path": path,
         "candidateFiles": candidates,
     }
-    write_json(ai_dir / "evidence" / "data-model-sources.json", evidence)
+    write_json(base / "evidence" / "data-model-sources.json", evidence)
 
-    draft = f"""# M5 Data Model Draft
+    draft = f"""# Data Model Draft
 
 Generated: {now_iso()}
 
@@ -212,16 +233,16 @@ The next AI step should inspect the candidate artifacts and infer:
 - gaps between code model and database model
 
 """
-    write_text(ai_dir / "models" / "m5-data-model.draft.md", draft)
-    write_text(ai_dir / "reports" / "data-model-understanding-report.md", draft)
+    write_text(base / "models" / "data-model.draft.md", draft)
+    write_text(base / "reports" / "data-model-understanding-report.md", draft)
 
     return {
         "status": "completed",
         "candidateFileCount": len(candidates),
         "outputs": [
-            ".ai/evidence/data-model-sources.json",
-            ".ai/models/m5-data-model.draft.md",
-            ".ai/reports/data-model-understanding-report.md",
+            ".mde/evidence/data-model-sources.json",
+            ".mde/models/data-model.draft.md",
+            ".mde/reports/data-model-understanding-report.md",
         ],
         "message": "Data model evidence collected. AI interpretation should review the generated draft and candidate files.",
     }
@@ -229,14 +250,14 @@ The next AI step should inspect the candidate artifacts and infer:
 
 @mcp.tool()
 def mde_capture_requirements_from_codebase(module: str = "") -> Dict[str, Any]:
-    """Create a draft M1 requirements model from codebase evidence."""
+    """Create a draft requirements model from codebase evidence."""
     root = workspace_root()
-    ai_dir = root / ".ai"
-    ensure_dir(ai_dir / "models")
-    ensure_dir(ai_dir / "reports")
+    base = mde_dir()
+    ensure_dir(base / "models")
+    ensure_dir(base / "reports")
 
-    code_map = ai_dir / "code-map.full.json"
-    draft = f"""# M1 Requirements Draft
+    code_map = base / "models" / "codebase-model.json"
+    draft = f"""# Requirements Draft
 
 Generated: {now_iso()}
 
@@ -246,21 +267,21 @@ Generated: {now_iso()}
 
 ## Evidence
 
-- code-map exists: `{code_map.exists()}`
+- codebase model exists: `{code_map.exists()}`
 
 ## AI Interpretation Required
 
 Infer visible features, user actions, business rules, and gaps from controllers, handlers, domain objects, tests, and documentation.
 
 """
-    write_text(ai_dir / "models" / "m1-requirements.draft.md", draft)
-    write_text(ai_dir / "reports" / "requirements-capture-report.md", draft)
+    write_text(base / "models" / "requirements.draft.md", draft)
+    write_text(base / "reports" / "requirements-capture-report.md", draft)
 
     return {
         "status": "completed",
         "outputs": [
-            ".ai/models/m1-requirements.draft.md",
-            ".ai/reports/requirements-capture-report.md",
+            ".mde/models/requirements.draft.md",
+            ".mde/reports/requirements-capture-report.md",
         ],
         "message": "Requirements draft artifact created. AI should now fill it from selected evidence.",
     }
@@ -268,19 +289,23 @@ Infer visible features, user actions, business rules, and gaps from controllers,
 
 @mcp.tool()
 def mde_capture_architecture_from_codebase(area: str = "") -> Dict[str, Any]:
-    """Create a draft M3 architecture and patterns model from codebase evidence."""
+    """Create a draft architecture and patterns model from codebase evidence."""
     root = workspace_root()
-    ai_dir = root / ".ai"
-    ensure_dir(ai_dir / "models")
-    ensure_dir(ai_dir / "reports")
+    base = mde_dir()
+    ensure_dir(base / "models")
+    ensure_dir(base / "reports")
 
-    draft = f"""# M3 Architecture and Patterns Draft
+    draft = f"""# Architecture and Patterns Draft
 
 Generated: {now_iso()}
 
 ## Scope
 
 - area: `{area or 'all'}`
+
+## Skills Directory
+
+- `.ai/skills/`
 
 ## AI Interpretation Required
 
@@ -298,14 +323,14 @@ Extract only observed patterns:
 For each pattern, include examples, inconsistencies, and canonical recommendation.
 
 """
-    write_text(ai_dir / "models" / "m3-architecture-and-patterns.draft.md", draft)
-    write_text(ai_dir / "reports" / "architecture-capture-report.md", draft)
+    write_text(base / "models" / "architecture-and-patterns.draft.md", draft)
+    write_text(base / "reports" / "architecture-capture-report.md", draft)
 
     return {
         "status": "completed",
         "outputs": [
-            ".ai/models/m3-architecture-and-patterns.draft.md",
-            ".ai/reports/architecture-capture-report.md",
+            ".mde/models/architecture-and-patterns.draft.md",
+            ".mde/reports/architecture-capture-report.md",
         ],
         "message": "Architecture draft artifact created. AI should now fill it from selected evidence.",
     }
@@ -313,14 +338,10 @@ For each pattern, include examples, inconsistencies, and canonical recommendatio
 
 @mcp.tool()
 def mde_generate_work_items_from_git_issues(repo: str, label: str = "") -> Dict[str, Any]:
-    """Create placeholder work-item import report for GitHub issues.
-
-    The actual GitHub fetch should be implemented by the AI client or a GitHub-enabled MCP tool.
-    """
-    root = workspace_root()
-    ai_dir = root / ".ai"
-    ensure_dir(ai_dir / "work-items")
-    ensure_dir(ai_dir / "reports")
+    """Create placeholder work-item import report for GitHub issues."""
+    base = mde_dir()
+    ensure_dir(base / "work-items")
+    ensure_dir(base / "reports")
 
     report = f"""# GitHub Issues Import Report
 
@@ -333,14 +354,14 @@ Generated: {now_iso()}
 
 ## Next Step
 
-Fetch issues through the GitHub connector/MCP tool, then normalize each issue into `.ai/work-items/*.work-item.md`.
+Fetch issues through the GitHub connector/MCP tool, then normalize each issue into `.mde/work-items/*.work-item.md`.
 
 """
-    write_text(ai_dir / "reports" / "git-issues-import-report.md", report)
+    write_text(base / "reports" / "git-issues-import-report.md", report)
 
     return {
         "status": "prepared",
-        "outputs": [".ai/reports/git-issues-import-report.md"],
+        "outputs": [".mde/reports/git-issues-import-report.md"],
         "message": "Issue import report created. GitHub issue fetch must be connected through the AI client or GitHub MCP tool.",
     }
 
@@ -348,14 +369,13 @@ Fetch issues through the GitHub connector/MCP tool, then normalize each issue in
 @mcp.tool()
 def mde_define_work_item(name: str, entity: str = "", operation: str = "", type: str = "change") -> Dict[str, Any]:
     """Define a new MDE work-item and initial plan shell."""
-    root = workspace_root()
-    ai_dir = root / ".ai"
+    base = mde_dir()
     slug = slugify(name)
-    ensure_dir(ai_dir / "work-items")
-    ensure_dir(ai_dir / "plans")
+    ensure_dir(base / "work-items")
+    ensure_dir(base / "plans")
 
-    work_item_path = ai_dir / "work-items" / f"{slug}.work-item.md"
-    plan_path = ai_dir / "plans" / f"{slug}.plan.md"
+    work_item_path = base / "work-items" / f"{slug}.work-item.md"
+    plan_path = base / "plans" / f"{slug}.plan.md"
 
     work_item = f"""# Work Item: {name}
 
@@ -388,7 +408,7 @@ Generated: {now_iso()}
 
 ## Work Item
 
-- `.ai/work-items/{slug}.work-item.md`
+- `.mde/work-items/{slug}.work-item.md`
 
 ## Execution Plan
 
@@ -400,8 +420,8 @@ TBD by `mde_review_work_item_scope`.
 
     return {
         "status": "completed",
-        "workItem": f".ai/work-items/{slug}.work-item.md",
-        "plan": f".ai/plans/{slug}.plan.md",
+        "workItem": f".mde/work-items/{slug}.work-item.md",
+        "plan": f".mde/plans/{slug}.plan.md",
         "message": "Work-item and initial plan created.",
     }
 
@@ -410,20 +430,20 @@ TBD by `mde_review_work_item_scope`.
 def mde_review_work_item_scope(work_item: str) -> Dict[str, Any]:
     """Review work-item scope and produce a planning checkpoint artifact."""
     root = workspace_root()
-    ai_dir = root / ".ai"
+    base = mde_dir()
     work_item_path = root / work_item
     slug = slugify(work_item_path.stem.replace(".work-item", ""))
 
-    ensure_dir(ai_dir / "plans")
-    ensure_dir(ai_dir / "context")
+    ensure_dir(base / "plans")
+    ensure_dir(base / "context")
 
     if not work_item_path.exists():
         return {"status": "error", "message": f"Work item not found: {work_item}"}
 
     content = work_item_path.read_text(encoding="utf-8")
-    plan_path = ai_dir / "plans" / f"{slug}.plan.md"
-    files_path = ai_dir / "context" / f"{slug}.files.txt"
-    submap_path = ai_dir / "context" / f"{slug}.submap.json"
+    plan_path = base / "plans" / f"{slug}.plan.md"
+    files_path = base / "context" / f"{slug}.files.txt"
+    submap_path = base / "context" / f"{slug}.submap.json"
 
     write_text(files_path, "")
     write_json(submap_path, {"generatedAt": now_iso(), "workItem": work_item, "artifacts": []})
@@ -447,10 +467,10 @@ Generated: {now_iso()}
 
 The AI should now:
 
-1. read relevant models
+1. read relevant `.mde/models/` files
 2. inspect filtered code-map summary
 3. identify affected files
-4. select skills
+4. select skills from `.ai/skills/`
 5. complete this plan
 6. stop for approval
 
@@ -463,10 +483,10 @@ Not approved.
 
     return {
         "status": "completed",
-        "plan": f".ai/plans/{slug}.plan.md",
+        "plan": f".mde/plans/{slug}.plan.md",
         "context": [
-            f".ai/context/{slug}.files.txt",
-            f".ai/context/{slug}.submap.json",
+            f".mde/context/{slug}.files.txt",
+            f".mde/context/{slug}.submap.json",
         ],
         "message": "Work-item scope reviewed and plan checkpoint created. AI should complete the plan before approval.",
     }
@@ -476,10 +496,10 @@ Not approved.
 def mde_approve_work_item(plan: str, approved_by: str = "user") -> Dict[str, Any]:
     """Record human approval for a work-item plan."""
     root = workspace_root()
-    ai_dir = root / ".ai"
+    base = mde_dir()
     plan_path = root / plan
     slug = slugify(plan_path.stem.replace(".plan", ""))
-    ensure_dir(ai_dir / "approvals")
+    ensure_dir(base / "approvals")
 
     if not plan_path.exists():
         return {"status": "error", "message": f"Plan not found: {plan}"}
@@ -490,7 +510,7 @@ def mde_approve_work_item(plan: str, approved_by: str = "user") -> Dict[str, Any
         "approvedAt": now_iso(),
         "status": "approved",
     }
-    approval_path = ai_dir / "approvals" / f"{slug}.approval.json"
+    approval_path = base / "approvals" / f"{slug}.approval.json"
     write_json(approval_path, approval)
 
     existing = plan_path.read_text(encoding="utf-8")
@@ -501,26 +521,22 @@ def mde_approve_work_item(plan: str, approved_by: str = "user") -> Dict[str, Any
 
     return {
         "status": "approved",
-        "approval": f".ai/approvals/{slug}.approval.json",
+        "approval": f".mde/approvals/{slug}.approval.json",
         "message": "Plan approved. Execution is now allowed.",
     }
 
 
 @mcp.tool()
 def mde_execute_approved_work_item(plan: str, mode: str = "supervised") -> Dict[str, Any]:
-    """Execute an approved work-item.
-
-    This MCP scaffold verifies approval and creates an execution report/checkpoint.
-    Actual source edits are performed by the AI IDE using the approved plan.
-    """
+    """Execute an approved work-item."""
     root = workspace_root()
-    ai_dir = root / ".ai"
+    base = mde_dir()
     plan_path = root / plan
     slug = slugify(plan_path.stem.replace(".plan", ""))
-    approval_path = ai_dir / "approvals" / f"{slug}.approval.json"
+    approval_path = base / "approvals" / f"{slug}.approval.json"
 
-    ensure_dir(ai_dir / "reports")
-    ensure_dir(ai_dir / "patches")
+    ensure_dir(base / "reports")
+    ensure_dir(base / "patches")
 
     if not plan_path.exists():
         return {"status": "error", "message": f"Plan not found: {plan}"}
@@ -557,15 +573,15 @@ Generated: {now_iso()}
 
 ## AI IDE Step
 
-The AI IDE should apply only the approved plan, keep changes inside scope, and update this report after editing.
+The AI IDE should apply only the approved plan, keep changes inside scope, use skills from `.ai/skills/`, and update this report after editing.
 
 """
-    write_text(ai_dir / "reports" / f"{slug}.completion-report.md", report)
+    write_text(base / "reports" / f"{slug}.completion-report.md", report)
 
     return {
         "status": "ready_for_ai_execution",
         "mode": mode,
-        "report": f".ai/reports/{slug}.completion-report.md",
+        "report": f".mde/reports/{slug}.completion-report.md",
         "message": "Approval verified. AI IDE may now execute the approved plan in supervised mode.",
     }
 
